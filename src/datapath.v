@@ -21,7 +21,9 @@
 
 
 // The datapath is where data flows through and is processed.
-module datapath (
+module datapath #(
+  parameter ENABLE_COUNTERS = 1
+)(
   input clk,
   input reset,
   input [XLEN-1:0] imem_rdata,
@@ -59,6 +61,10 @@ module datapath (
   wire [WB_SEL_LEN-1:0] wb_sel;
   reg [XLEN-1:0] reg_wdata;
 
+  wire [CSR_CMD_LEN-1:0] csr_cmd;
+  wire [CSR_SEL_LEN-1:0] csr_sel;
+  wire [XLEN-1:0] csr_rdata;
+
   wire error;
 
 
@@ -74,6 +80,8 @@ module datapath (
     .dmem_we(dmem_we),
     .reg_we(reg_we),
     .wb_sel(wb_sel),
+    .csr_cmd(csr_cmd),
+    .csr_sel(csr_sel),
     .pc_sel(pc_sel),
     .error(error)
   );
@@ -196,8 +204,31 @@ module datapath (
   always @(*) begin
     case (wb_sel)
       WB_MEM: reg_wdata = load_data;
+      WB_CSR: reg_wdata = csr_rdata;
       default: reg_wdata = alu_out;
     endcase
   end
+
+  generate
+  if (ENABLE_COUNTERS) begin
+    wire [CSR_ADDR_LEN-1:0] csr_addr = inst[31:20];
+    wire [XLEN-1:0] csr_imm = {{(XLEN - 5){1'b0}}, inst[19:15]};
+    wire [XLEN-1:0] csr_wdata = (csr_sel == CSR_SEL_IMM) ? csr_imm : rs1_data;
+
+    csr csr (
+      // input
+      .clk(clk),
+      .reset(reset),
+      .cmd(csr_cmd),
+      .addr(csr_addr),
+      .wdata(csr_wdata),
+
+      // output
+      .rdata(csr_rdata)
+    );
+  end else begin
+    assign csr_rdata = 0;
+  end
+  endgenerate
 
 endmodule

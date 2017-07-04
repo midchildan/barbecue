@@ -32,6 +32,8 @@ module control (
   output reg dmem_we,
   output reg reg_we,
   output reg [WB_SEL_LEN-1:0] wb_sel,
+  output reg [CSR_CMD_LEN-1:0] csr_cmd,
+  output reg [CSR_SEL_LEN-1:0] csr_sel,
   output reg [PC_SEL_LEN-1:0] pc_sel,
   output reg error
 );
@@ -114,6 +116,7 @@ module control (
   wire [6:0] opcode = inst[6:0];
   wire [2:0] funct3 = inst[14:12];
   wire [6:0] funct7 = inst[31:25];
+  wire [REG_ADDR_LEN-1:0] rs1_addr = inst[19:15];
 
   reg [ALU_OP_LEN-1:0] alu_op_arith;
 
@@ -124,6 +127,8 @@ module control (
     dmem_we = 1'b0;
     reg_we = 1'b0;
     wb_sel = WB_ALU;
+    csr_sel = CSR_SEL_RS1;
+    csr_cmd = CSR_READ;
     pc_sel = PC_PLUS_FOUR;
     error = 1'b0;
 
@@ -174,6 +179,36 @@ module control (
         alu_op = alu_op_arith;
         alu_srcb = SRCB_RS2;
         reg_we = 1'b1;
+      end
+      RV_SYSTEM: begin
+        // Only a few CSR instructions are implemented for RV_SYSTEM
+        wb_sel = WB_CSR;
+        reg_we = 1'b1;
+        case (funct3)
+          RV_FUNCT3_CSRRW: begin
+            csr_cmd = CSR_WRITE;
+          end
+          RV_FUNCT3_CSRRS: begin
+            csr_cmd = CSR_SET;
+          end
+          RV_FUNCT3_CSRRC: begin
+            csr_cmd = CSR_CLEAR;
+          end
+          RV_FUNCT3_CSRRWI: begin
+            csr_cmd = CSR_WRITE;
+            csr_sel = CSR_SEL_IMM;
+          end
+          RV_FUNCT3_CSRRSI: begin
+            csr_cmd = CSR_SET;
+            csr_sel = CSR_SEL_IMM;
+          end
+          RV_FUNCT3_CSRRCI: begin
+            csr_cmd = CSR_CLEAR;
+            csr_sel = CSR_SEL_IMM;
+          end
+          default: error = 1'b1;
+        endcase
+        if (rs1_addr == 0) csr_cmd = CSR_READ;
       end
       RV_AUIPC: begin
         alu_srca = SRCA_PC;
