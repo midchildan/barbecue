@@ -20,19 +20,29 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-module top (
+module bbq #(
+  parameter IMEM_NWORDS = (1 << XLEN) / XLEN,
+  parameter DMEM_NWORDS = (1 << XLEN) / XLEN
+)(
   input clk,
-  input reset
+  input reset,
+
+  output reg [XLEN-1:0] console_wdata,
+  output reg console_we
 );
 
   `include "constants.vh"
+
+  localparam CONSOLE_ADDR = `D_XLEN'h10000000;
 
   wire [XLEN-1:0] imem_addr;
   wire [XLEN-1:0] imem_rdata;
   wire [XLEN-1:0] dmem_addr;
   wire [XLEN-1:0] dmem_rdata;
-  wire [XLEN-1:0] dmem_wdata;
-  wire dmem_we;
+  wire [XLEN-1:0] dmem_io_wdata;
+  wire dmem_io_we;
+  reg [XLEN-1:0] dmem_wdata;
+  reg dmem_we;
 
   datapath datapath (
     // input
@@ -44,11 +54,30 @@ module top (
     // output
     .imem_addr(imem_addr),
     .dmem_addr(dmem_addr),
-    .dmem_wdata(dmem_wdata),
-    .dmem_we(dmem_we)
+    .dmem_wdata(dmem_io_wdata),
+    .dmem_we(dmem_io_we)
   );
 
-  imem imem (
+  wire is_console = dmem_io_we && (dmem_addr == CONSOLE_ADDR);
+
+  always @(*) begin
+    dmem_we = 1'b0;
+    dmem_wdata = `D_XLEN'b0;
+    console_we = 1'b0;
+    console_wdata = `D_XLEN'b0;
+
+    if (is_console) begin
+      console_we = 1'b1;
+      console_wdata = dmem_io_wdata;
+    end else begin
+      dmem_we = dmem_io_we;
+      dmem_wdata = dmem_io_wdata;
+    end
+  end
+
+  imem #(
+    .NWORDS(IMEM_NWORDS)
+  ) imem (
     // input
     .clk(clk),
     .addr(imem_addr),
@@ -57,7 +86,9 @@ module top (
     .rdata(imem_rdata)
   );
 
-  dmem dmem (
+  dmem #(
+    .NWORDS(DMEM_NWORDS)
+  ) dmem (
     // input
     .clk(clk),
     .addr(dmem_addr),
