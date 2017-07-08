@@ -8,7 +8,6 @@
 #define ENABLE_QREGS
 #define ENABLE_RVTST
 #define ENABLE_SIEVE
-#define ENABLE_MULTST
 #define ENABLE_STATS
 
 #ifndef ENABLE_QREGS
@@ -24,7 +23,6 @@
 
 	.section .text
 	.global sieve
-	.global multest
 	.global stats
 
 
@@ -146,11 +144,6 @@ start:
 #ifdef ENABLE_SIEVE
 	/* call sieve C code */
 	jal ra,sieve
-#endif
-
-#ifdef ENABLE_MULTST
-	/* call multest C code */
-	jal ra,multest
 #endif
 
 #ifdef ENABLE_STATS
