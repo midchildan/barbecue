@@ -27,7 +27,7 @@ module mem_load (
   input [XLEN-1:0] data,
   input [MEM_TYPE_LEN-1:0] load_type,
 
-  output [XLEN-1:0] to_load
+  output reg [XLEN-1:0] to_load
 );
 
   `include "constants.vh"

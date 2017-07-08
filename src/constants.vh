@@ -77,16 +77,17 @@ localparam MEM_TYPE_LEN = `D_MEM_TYPE_LEN,
            MEM_H        = `D_MEM_TYPE_LEN'b001,
            MEM_W        = `D_MEM_TYPE_LEN'b010,
            MEM_D        = `D_MEM_TYPE_LEN'b011,
-           MEM_BU       = `D_MEM_TYPE_LEN'd100,
-           MEM_HU       = `D_MEM_TYPE_LEN'd101,
-           MEM_WU       = `D_MEM_TYPE_LEN'd110;
+           MEM_BU       = `D_MEM_TYPE_LEN'b100,
+           MEM_HU       = `D_MEM_TYPE_LEN'b101,
+           MEM_WU       = `D_MEM_TYPE_LEN'b110;
 
 localparam WB_SEL_LEN = `D_WB_SEL_LEN,
            WB_ALU     = `D_WB_SEL_LEN'd0,
            WB_MEM     = `D_WB_SEL_LEN'd1,
            WB_CSR     = `D_WB_SEL_LEN'd2;
 
-localparam RV_NOP = `D_XLEN'b0010011;
+localparam RV_NOP     = `D_XLEN'b0010011,
+           RV_INVALID = `D_XLEN'b0;
 
 localparam CSR_SEL_LEN     = `D_CSR_SEL_LEN,
            CSR_SEL_RS1     = `D_CSR_SEL_LEN'd0,

@@ -23,12 +23,13 @@
 // The control unit takes an instruction, decodes it, and sends control signals
 // to the datapath.
 module control (
+  input reset,
   input [XLEN-1:0] inst,
 
   output reg [ALU_OP_LEN-1:0] alu_op,
   output reg [SRCA_SEL_LEN-1:0] alu_srca,
   output reg [SRCB_SEL_LEN-1:0] alu_srcb,
-  output reg [MEM_TYPE_LEN-1:0] dmem_type,
+  output wire [MEM_TYPE_LEN-1:0] dmem_type,
   output reg dmem_we,
   output reg reg_we,
   output reg [WB_SEL_LEN-1:0] wb_sel,
@@ -130,7 +131,9 @@ module control (
     csr_sel = CSR_SEL_RS1;
     csr_cmd = CSR_READ;
     pc_sel = PC_PLUS_FOUR;
-    error = 1'b0;
+    if (reset) begin
+      error = 1'b0;
+    end
 
     case (opcode)
       RV_LOAD: begin

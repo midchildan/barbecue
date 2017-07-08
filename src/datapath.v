@@ -70,6 +70,7 @@ module datapath #(
 
   control control (
     // input
+    .reset(reset),
     .inst(inst),
 
     // output
@@ -106,7 +107,8 @@ module datapath #(
   assign imem_addr = pc;
 
   always @(posedge clk) begin
-    if (reset || error) inst <= RV_NOP;
+    if (reset) inst <= RV_NOP;
+    else if (error) inst <= RV_INVALID;
     else inst <= imem_rdata;
   end
 
@@ -136,8 +138,8 @@ module datapath #(
     .rd2(rs2_data)
   );
 
-  reg [XLEN-1:0] alu_srca;
-  reg [XLEN-1:0] alu_srcb;
+  wire [XLEN-1:0] alu_srca;
+  wire [XLEN-1:0] alu_srcb;
 
   alu_src_mux alu_src_mux (
     // input
@@ -156,7 +158,7 @@ module datapath #(
     .srcb(alu_srcb)
   );
 
-  reg [XLEN-1:0] alu_out;
+  wire [XLEN-1:0] alu_out;
   assign branch = alu_out[0];
 
   alu alu (
