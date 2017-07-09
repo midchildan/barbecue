@@ -33,7 +33,7 @@ module imem #(
   `include "constants.vh"
 
   reg [XLEN-1:0] mem [NWORDS-1:0];
-  wire [XLEN-1:0] addr_word = addr[XLEN-1:2];
+  wire [XLEN-1:0] addr_word = {{2{1'b0}}, addr[XLEN-1:2]};
   wire [$clog2(NWORDS)-1:0] mem_idx = addr_word[$clog2(NWORDS)-1:0];
 
   initial begin

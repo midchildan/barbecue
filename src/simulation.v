@@ -53,7 +53,9 @@ module simulation ();
 
     // output
     .console_we(console_we),
-    .console_wdata(console_wdata)
+    .console_wdata(console_wdata),
+    .test_passed(test_passed),
+    .error(error)
   );
 
   always @(posedge clk) begin
@@ -61,6 +63,17 @@ module simulation ();
       $display("%t console: %s", $time, console_wdata);
     end else if (console_we) begin
       $write("%s", console_wdata);
+    end
+  end
+
+  wire sim_fail    = ~reset && error && ~test_passed;
+  wire sim_success = ~reset && error && test_passed;
+
+  always @(posedge clk) begin
+    if (sim_success) begin
+      $finish;
+    end else if (sim_fail) begin
+      $fatal;
     end
   end
 
@@ -294,7 +307,7 @@ module inst_logger (
 
   always @(posedge clk) begin
     if (en) begin
-      $display("%t inst: op=%s bits=%b", $time, inst_str, inst);
+      $display("%t inst: op=%s rdata=0x%x bits=%b", $time, inst_str, inst, inst);
     end
   end
 
@@ -403,7 +416,7 @@ module imem_logger (
 
   always @(posedge clk) begin
     if (en) begin
-      $display("%t imem: addr=0x%x rdata=%b", $time, addr, rdata);
+      $display("%t imem: addr=0x%x rdata=0x%x bits=%b", $time, addr, rdata, rdata);
     end
   end
 

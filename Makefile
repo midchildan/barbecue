@@ -10,23 +10,23 @@ TOOLCHAIN_PREFIX = $(RISCV_GNU_TOOLCHAIN_INSTALL_PREFIX)/bin/riscv32-unknown-elf
 
 .PHONY: all build-dir test test_vcd imem_test clean
 
-all: build-dir build/testbench.vvp build/tests/imem.dat
+all: build-dir build/bbq.vvp build/tests/imem.dat
 
 build-dir:
 	mkdir -p build/tests/isa
 	mkdir -p build/tests/firmware
 
-test: build/testbench.vvp imem_test
+test: build/bbq.vvp imem_test
 	vvp -N $<
 
-test_vcd: build/testbench.vvp imem_test
+test_vcd: build/bbq.vvp imem_test
 	vvp -N $< +vcd +logger
 
 imem_test: build/tests/imem.dat
 	$(RM) imem.dat
 	ln -s $< imem.dat
 
-build/testbench.vvp: $(BBQ_SRC)
+build/bbq.vvp: $(BBQ_SRC)
 	iverilog -grelative-include -o $@ $^
 	chmod -x $@
 

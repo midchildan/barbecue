@@ -32,7 +32,8 @@ module datapath #(
   output [XLEN-1:0] imem_addr,
   output [XLEN-1:0] dmem_addr,
   output [XLEN-1:0] dmem_wdata,
-  output dmem_we
+  output dmem_we,
+  output error
 );
 
   `include "constants.vh"
@@ -64,8 +65,6 @@ module datapath #(
   wire [CSR_CMD_LEN-1:0] csr_cmd;
   wire [CSR_SEL_LEN-1:0] csr_sel;
   wire [XLEN-1:0] csr_rdata;
-
-  wire error;
 
 
   control control (

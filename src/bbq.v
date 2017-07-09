@@ -28,12 +28,15 @@ module bbq #(
   input reset,
 
   output reg [XLEN-1:0] console_wdata,
-  output reg console_we
+  output reg console_we,
+  output reg test_passed = 1'b0,
+  output error
 );
 
   `include "constants.vh"
 
-  localparam CONSOLE_ADDR = `D_XLEN'h10000000;
+  localparam CONSOLE_ADDR   = `D_XLEN'h1000_0000;
+  localparam TEST_STAT_ADDR = `D_XLEN'h2000_0000;
 
   wire [XLEN-1:0] imem_addr;
   wire [XLEN-1:0] imem_rdata;
@@ -55,10 +58,12 @@ module bbq #(
     .imem_addr(imem_addr),
     .dmem_addr(dmem_addr),
     .dmem_wdata(dmem_io_wdata),
-    .dmem_we(dmem_io_we)
+    .dmem_we(dmem_io_we),
+    .error(error)
   );
 
   wire is_console = dmem_io_we && (dmem_addr == CONSOLE_ADDR);
+  wire is_test_res = (dmem_addr == TEST_STAT_ADDR) && (dmem_io_wdata == 123456789);
 
   always @(*) begin
     dmem_we = 1'b0;
@@ -69,6 +74,8 @@ module bbq #(
     if (is_console) begin
       console_we = 1'b1;
       console_wdata = dmem_io_wdata;
+    end else if (is_test_res) begin
+      test_passed = 1'b1;
     end else begin
       dmem_we = dmem_io_we;
       dmem_wdata = dmem_io_wdata;
