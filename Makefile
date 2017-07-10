@@ -20,7 +20,7 @@ test: build/bbq.vvp imem_test
 	vvp -N $<
 
 test_vcd: build/bbq.vvp imem_test
-	vvp -N $< +vcd +logger
+	vvp -N $< +vcd +verbose
 
 imem_test: build/tests/imem.dat
 	$(RM) imem.dat

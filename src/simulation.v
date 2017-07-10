@@ -88,7 +88,7 @@ module simulation ();
   end
 
   initial begin
-    if ($test$plusargs("logger")) begin
+    if ($test$plusargs("verbose")) begin
       enable_logger = 1'b1;
     end
   end
@@ -275,7 +275,7 @@ module inst_logger (
       RV_LUI: inst_str = "lui";
     endcase // case (opcode)
 
-    case (inst_str)
+    case (inst)
       RV_NOP:     inst_str = "nop";
       RV_INVALID: inst_str = "invalid";
     endcase

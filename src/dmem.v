@@ -22,7 +22,7 @@
 
 // The data memory stores data that the datapath can process.
 module dmem #(
-  parameter NWORDS = (1 << XLEN) / XLEN
+  parameter NWORDS = (1 << XLEN) / (XLEN / 8)
 )(
   input clk,
   input [XLEN-1:0] addr,
@@ -35,8 +35,7 @@ module dmem #(
   `include "constants.vh"
 
   reg [XLEN-1:0] mem [NWORDS-1:0];
-  wire [XLEN-1:0] addr_word = {{2{1'b0}}, addr[XLEN-1:2]};
-  wire [$clog2(NWORDS)-1:0] mem_idx = addr_word[$clog2(NWORDS)-1:0];
+  wire [XLEN-1:0] mem_idx = addr >> 2;
 
   initial begin
     $readmemh("dmem.dat", mem);
@@ -44,7 +43,7 @@ module dmem #(
 
   always @(posedge clk) begin
     if (we) begin
-      mem[addr] <= wdata;
+      mem[mem_idx] <= wdata;
     end else begin
       rdata <= mem[mem_idx];
     end
