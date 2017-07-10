@@ -29,7 +29,7 @@ module dmem #(
   input [XLEN-1:0] wdata,
   input we,
 
-  output reg [XLEN-1:0] rdata
+  output [XLEN-1:0] rdata
 );
 
   `include "constants.vh"
@@ -37,16 +37,16 @@ module dmem #(
   reg [XLEN-1:0] mem [NWORDS-1:0];
   wire [XLEN-1:0] mem_idx = addr >> 2;
 
-  initial begin
-    $readmemh("dmem.dat", mem);
-  end
+  assign rdata = mem[mem_idx];
 
   always @(posedge clk) begin
     if (we) begin
       mem[mem_idx] <= wdata;
-    end else begin
-      rdata <= mem[mem_idx];
     end
+  end
+
+  initial begin
+    $readmemh("dmem.dat", mem);
   end
 
 endmodule

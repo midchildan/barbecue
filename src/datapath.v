@@ -105,14 +105,14 @@ module datapath #(
 
   assign imem_addr = pc;
 
-  always @(posedge clk) begin
-    if (reset) inst <= RV_NOP;
-    else if (error) inst <= RV_INVALID;
-    else inst <= imem_rdata;
+  always @(*) begin
+    if (reset) inst = RV_NOP;
+    else if (error) inst = RV_INVALID;
+    else inst = imem_rdata;
   end
 
   always @(posedge clk) begin
-    if (reset) pc <= `D_XLEN'h200;
+    if (reset) pc <= `D_XLEN'h0;
     else if (~error) pc <= pc_next;
   end
 

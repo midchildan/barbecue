@@ -86,7 +86,6 @@ module bbq #(
     .NWORDS(IMEM_NWORDS)
   ) imem (
     // input
-    .clk(clk),
     .addr(imem_addr),
 
     // output
