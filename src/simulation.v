@@ -30,7 +30,7 @@ module simulation ();
 
   reg clk = 1'b0;
   reg reset = 1'b1;
-  wire console_we = 1'b0;
+  wire console_we;
   wire [XLEN-1:0] console_wdata;
   reg enable_logger = 1'b0;
 
@@ -62,7 +62,7 @@ module simulation ();
     if (enable_logger && console_we) begin
       $display("%t console: %s", $time, console_wdata);
     end else if (console_we) begin
-      $write("%s", console_wdata);
+      $write("%s", console_wdata[7:0]);
     end
   end
 
@@ -127,7 +127,8 @@ module simulation ();
     .srca_sel(bbq.datapath.alu_src_mux.srca_sel),
     .srcb_sel(bbq.datapath.alu_src_mux.srcb_sel),
     .srca(bbq.datapath.alu.srca),
-    .srcb(bbq.datapath.alu.srcb)
+    .srcb(bbq.datapath.alu.srcb),
+    .out(bbq.datapath.alu.out)
   );
 
   regfile_logger regfile_logger (
@@ -320,7 +321,8 @@ module alu_logger (
   input [SRCA_SEL_LEN-1:0] srca_sel,
   input [SRCB_SEL_LEN-1:0] srcb_sel,
   input [XLEN-1:0] srca,
-  input [XLEN-1:0] srcb
+  input [XLEN-1:0] srcb,
+  input [XLEN-1:0] out
 );
 
   `include "constants.vh"
@@ -378,8 +380,8 @@ module alu_logger (
 
   always @(posedge clk) begin
     if (en) begin
-      $display("%t alu: opcode=%s srca_sel=%s srca=%d srcb_sel=%s srcb=%d",
-               $time, op_str, srca_sel_str, srca, srcb_sel_str, srcb);
+      $display("%t alu: opcode=%s srca_sel=%s srca=%d srcb_sel=%s srcb=%d out=%d",
+               $time, op_str, srca_sel_str, srca, srcb_sel_str, srcb, out);
     end
   end
 

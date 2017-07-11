@@ -63,7 +63,7 @@ module bbq #(
   );
 
   wire is_console = dmem_io_we && (dmem_addr == CONSOLE_ADDR);
-  wire is_test_res = (dmem_addr == TEST_STAT_ADDR) && (dmem_io_wdata == 123456789);
+  wire is_test_res = dmem_io_we && (dmem_addr == TEST_STAT_ADDR) && (dmem_io_wdata == 123456789);
 
   always @(*) begin
     dmem_we = 1'b0;
