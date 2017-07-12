@@ -27,6 +27,7 @@ module dmem #(
   input clk,
   input [XLEN-1:0] addr,
   input [XLEN-1:0] wdata,
+  input [XLEN-1:0] wmask,
   input we,
 
   output [XLEN-1:0] rdata
@@ -34,14 +35,21 @@ module dmem #(
 
   `include "constants.vh"
 
+  localparam SHAMT_WIDTH = 5;
+
   reg [XLEN-1:0] mem [NWORDS-1:0];
+
   wire [XLEN-1:0] mem_idx = addr >> 2;
+  wire [SHAMT_WIDTH-1:0] shamt = {addr[1:0], 3'b0};
+  wire [XLEN-1:0] wdata_shifted = (wdata & wmask) << shamt;
+  wire [XLEN-1:0] rdata_masked = mem[mem_idx] & ~(wmask << shamt);
+  wire [XLEN-1:0] to_store = wdata_shifted | rdata_masked;
 
   assign rdata = mem[mem_idx];
 
   always @(posedge clk) begin
     if (we) begin
-      mem[mem_idx] <= wdata;
+      mem[mem_idx] <= to_store;
     end
   end
 

@@ -132,6 +132,7 @@ module simulation ();
   );
 
   regfile_logger regfile_logger (
+    // input
     .clk(clk),
     .en(enable_logger),
     .ra1(bbq.datapath.regfile.ra1),
@@ -158,7 +159,8 @@ module simulation ();
     .we(bbq.dmem.we),
     .addr(bbq.dmem.addr),
     .rdata(bbq.dmem.rdata),
-    .wdata(bbq.dmem.wdata)
+    .wdata(bbq.dmem.wdata),
+    .wmask(bbq.dmem.wmask)
   );
 
 endmodule // module simulation
@@ -430,15 +432,16 @@ module dmem_logger (
   input we,
   input [XLEN-1:0] addr,
   input [XLEN-1:0] rdata,
-  input [XLEN-1:0] wdata
+  input [XLEN-1:0] wdata,
+  input [XLEN-1:0] wmask
 );
 
   `include "constants.vh"
 
   always @(posedge clk) begin
     if (en) begin
-      $display("%t dmem: we=%b addr=0x%x rdata=%d wdata=%d",
-               $time, we, addr, rdata, wdata);
+      $display("%t dmem: we=%b addr=0x%x rdata=0x%x wdata=0x%x wmask=0x%x",
+               $time, we, addr, rdata, wdata, wmask);
     end
   end
 

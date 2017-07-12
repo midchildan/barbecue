@@ -32,6 +32,7 @@ module datapath #(
   output [XLEN-1:0] imem_addr,
   output [XLEN-1:0] dmem_addr,
   output [XLEN-1:0] dmem_wdata,
+  output reg [XLEN-1:0] dmem_wmask,
   output dmem_we,
   output error
 );
@@ -174,7 +175,7 @@ module datapath #(
   // Memory
 
   wire [XLEN-1:0] load_data;
-  wire [XLEN-1:0] store_data;
+  wire [XLEN-1:0] store_mask;
 
   mem_load mem_load (
     // input
@@ -186,18 +187,16 @@ module datapath #(
     .to_load(load_data)
   );
 
-  mem_store mem_store (
-    // input
-    .addr(alu_out),
-    .data(rs2_data),
-    .store_type(dmem_type),
-
-    // output
-    .to_store(store_data)
-  );
-
   assign dmem_addr = alu_out;
-  assign dmem_wdata = store_data;
+  assign dmem_wdata = rs2_data;
+
+  always @(*) begin
+    case (dmem_type)
+      MEM_B:   dmem_wmask = `D_XLEN'hFF;
+      MEM_H:   dmem_wmask = `D_XLEN'hFFFF;
+      default: dmem_wmask = ~(`D_XLEN'h0);
+    endcase
+  end
 
 
   // Write Back

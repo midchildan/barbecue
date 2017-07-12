@@ -42,6 +42,7 @@ module bbq #(
   wire [XLEN-1:0] imem_rdata;
   wire [XLEN-1:0] dmem_addr;
   wire [XLEN-1:0] dmem_rdata;
+  wire [XLEN-1:0] dmem_wmask;
   wire [XLEN-1:0] dmem_io_wdata;
   wire dmem_io_we;
   reg [XLEN-1:0] dmem_wdata;
@@ -58,6 +59,7 @@ module bbq #(
     .imem_addr(imem_addr),
     .dmem_addr(dmem_addr),
     .dmem_wdata(dmem_io_wdata),
+    .dmem_wmask(dmem_wmask),
     .dmem_we(dmem_io_we),
     .error(error)
   );
@@ -99,6 +101,7 @@ module bbq #(
     .clk(clk),
     .addr(dmem_addr),
     .wdata(dmem_wdata),
+    .wmask(dmem_wmask),
     .we(dmem_we),
 
     // output
