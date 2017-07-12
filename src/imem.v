@@ -37,7 +37,7 @@ module imem #(
   assign rdata = mem[mem_idx];
 
   initial begin
-    $readmemh("imem.dat", mem);
+    $readmemh("imem.hex", mem);
   end
 
 endmodule

@@ -54,7 +54,7 @@ module dmem #(
   end
 
   initial begin
-    $readmemh("dmem.dat", mem);
+    $readmemh("dmem.hex", mem);
   end
 
 endmodule
