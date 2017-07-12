@@ -23,97 +23,29 @@
 // The control unit takes an instruction, decodes it, and sends control signals
 // to the datapath.
 module control (
+  input reset,
   input [XLEN-1:0] inst,
 
   output reg [ALU_OP_LEN-1:0] alu_op,
   output reg [SRCA_SEL_LEN-1:0] alu_srca,
   output reg [SRCB_SEL_LEN-1:0] alu_srcb,
-  output reg [MEM_TYPE_LEN-1:0] dmem_type,
+  output wire [MEM_TYPE_LEN-1:0] dmem_type,
   output reg dmem_we,
   output reg reg_we,
   output reg [WB_SEL_LEN-1:0] wb_sel,
+  output reg [CSR_CMD_LEN-1:0] csr_cmd,
+  output reg [CSR_SEL_LEN-1:0] csr_sel,
   output reg [PC_SEL_LEN-1:0] pc_sel,
   output reg error
 );
 
   `include "constants.vh"
-
-  // opcodes
-  localparam RV_LOAD     = 7'b0000011,
-             RV_STORE    = 7'b0100011,
-             RV_MADD     = 7'b1000011,
-             RV_BRANCH   = 7'b1100011,
-             RV_LOAD_FP  = 7'b0000111,
-             RV_STORE_FP = 7'b0100111,
-             RV_MSUB     = 7'b1000111,
-             RV_JALR     = 7'b1100111,
-             RV_CUSTOM_0 = 7'b0001011,
-             RV_CUSTOM_1 = 7'b0101011,
-             RV_NMSUB    = 7'b1001011,
-             RV_MISC_MEM = 7'b0001111,
-             RV_AMO      = 7'b0101111,
-             RV_NMADD    = 7'b1001111,
-             RV_JAL      = 7'b1101111,
-             RV_OP_IMM   = 7'b0010011,
-             RV_OP       = 7'b0110011,
-             RV_OP_FP    = 7'b1010011,
-             RV_SYSTEM   = 7'b1110011,
-             RV_AUIPC    = 7'b0010111,
-             RV_LUI      = 7'b0110111,
-             RV_CUSTOM_2 = 7'b1011011,
-             RV_CUSTOM_3 = 7'b1111011;
-
-  // funct3 arithmetic
-  localparam RV_FUNCT3_ADD_SUB = 0,
-             RV_FUNCT3_SLL = 1,
-             RV_FUNCT3_SLT = 2,
-             RV_FUNCT3_SLTU = 3,
-             RV_FUNCT3_XOR = 4,
-             RV_FUNCT3_SRA_SRL = 5,
-             RV_FUNCT3_OR = 6,
-             RV_FUNCT3_AND = 7;
-
-  // funct3 branch
-  localparam RV_FUNCT3_BEQ = 0,
-             RV_FUNCT3_BNE = 1,
-             RV_FUNCT3_BLT = 4,
-             RV_FUNCT3_BGE = 5,
-             RV_FUNCT3_BLTU = 6,
-             RV_FUNCT3_BGEU = 7;
-
-  // funct3 MISC-MEM FUNCT3
-  localparam RV_FUNCT3_FENCE = 0,
-             RV_FUNCT3_FENCE_I = 1;
-
-  // funct3 SYSTEM
-  localparam RV_FUNCT3_PRIV = 0,
-             RV_FUNCT3_CSRRW = 1,
-             RV_FUNCT3_CSRRS = 2,
-             RV_FUNCT3_CSRRC = 3,
-             RV_FUNCT3_CSRRWI = 5,
-             RV_FUNCT3_CSRRSI = 6,
-             RV_FUNCT3_CSRRCI = 7;
-
-  // funct12 PRIV
-  localparam RV_FUNCT12_ECALL = 12'b000000000000,
-             RV_FUNCT12_EBREAK = 12'b000000000001,
-             RV_FUNCT12_ERET = 12'b000100000000,
-             RV_FUNCT12_WFI = 12'b000100000010;
-
-  // RVM encodings
-  localparam RV_FUNCT7_MUL_DIV = 7'd1,
-             RV_FUNCT3_MUL = 3'd0,
-             RV_FUNCT3_MULH = 3'd1,
-             RV_FUNCT3_MULHSU = 3'd2,
-             RV_FUNCT3_MULHU = 3'd3,
-             RV_FUNCT3_DIV = 3'd4,
-             RV_FUNCT3_DIVU = 3'd5,
-             RV_FUNCT3_REM = 3'd6,
-             RV_FUNCT3_REMU = 3'd7;
+  `include "rv_constants.vh"
 
   wire [6:0] opcode = inst[6:0];
   wire [2:0] funct3 = inst[14:12];
   wire [6:0] funct7 = inst[31:25];
+  wire [REG_ADDR_LEN-1:0] rs1_addr = inst[19:15];
 
   reg [ALU_OP_LEN-1:0] alu_op_arith;
 
@@ -124,8 +56,12 @@ module control (
     dmem_we = 1'b0;
     reg_we = 1'b0;
     wb_sel = WB_ALU;
+    csr_sel = CSR_SEL_RS1;
+    csr_cmd = CSR_READ;
     pc_sel = PC_PLUS_FOUR;
-    error = 1'b0;
+    if (reset) begin
+      error = 1'b0;
+    end
 
     case (opcode)
       RV_LOAD: begin
@@ -174,6 +110,36 @@ module control (
         alu_op = alu_op_arith;
         alu_srcb = SRCB_RS2;
         reg_we = 1'b1;
+      end
+      RV_SYSTEM: begin
+        // Only a few CSR instructions are implemented for RV_SYSTEM
+        wb_sel = WB_CSR;
+        reg_we = 1'b1;
+        case (funct3)
+          RV_FUNCT3_CSRRW: begin
+            csr_cmd = CSR_WRITE;
+          end
+          RV_FUNCT3_CSRRS: begin
+            csr_cmd = CSR_SET;
+          end
+          RV_FUNCT3_CSRRC: begin
+            csr_cmd = CSR_CLEAR;
+          end
+          RV_FUNCT3_CSRRWI: begin
+            csr_cmd = CSR_WRITE;
+            csr_sel = CSR_SEL_IMM;
+          end
+          RV_FUNCT3_CSRRSI: begin
+            csr_cmd = CSR_SET;
+            csr_sel = CSR_SEL_IMM;
+          end
+          RV_FUNCT3_CSRRCI: begin
+            csr_cmd = CSR_CLEAR;
+            csr_sel = CSR_SEL_IMM;
+          end
+          default: error = 1'b1;
+        endcase
+        if (rs1_addr == 0) csr_cmd = CSR_READ;
       end
       RV_AUIPC: begin
         alu_srca = SRCA_PC;

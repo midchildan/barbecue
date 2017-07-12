@@ -32,8 +32,8 @@ module alu_src_mux (
   input [XLEN-1:0] imm_u,
   input [XLEN-1:0] imm_j,
 
-  output [XLEN-1:0] srca,
-  output [XLEN-1:0] srcb
+  output reg [XLEN-1:0] srca,
+  output reg [XLEN-1:0] srcb
 );
 
   `include "constants.vh"

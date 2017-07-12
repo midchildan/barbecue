@@ -22,30 +22,39 @@
 
 // The data memory stores data that the datapath can process.
 module dmem #(
-  SIZE = (1 << XLEN)
+  parameter NWORDS = (1 << XLEN) / (XLEN / 8)
 )(
   input clk,
   input [XLEN-1:0] addr,
   input [XLEN-1:0] wdata,
+  input [XLEN-1:0] wmask,
   input we,
 
-  output reg [XLEN-1:0] rdata
+  output [XLEN-1:0] rdata
 );
 
   `include "constants.vh"
 
-  reg [XLEN-1:0] mem [SIZE-1:0];
+  localparam SHAMT_WIDTH = 5;
 
-  initial begin
-    $readmemh("dmem.dat", mem);
-  end
+  reg [XLEN-1:0] mem [NWORDS-1:0];
+
+  wire [XLEN-1:0] mem_idx = addr >> 2;
+  wire [SHAMT_WIDTH-1:0] shamt = {addr[1:0], 3'b0};
+  wire [XLEN-1:0] wdata_shifted = (wdata & wmask) << shamt;
+  wire [XLEN-1:0] rdata_masked = mem[mem_idx] & ~(wmask << shamt);
+  wire [XLEN-1:0] to_store = wdata_shifted | rdata_masked;
+
+  assign rdata = mem[mem_idx];
 
   always @(posedge clk) begin
     if (we) begin
-      mem[addr] <= wdata;
-    end else begin
-      rdata <= mem[addr];
+      mem[mem_idx] <= to_store;
     end
+  end
+
+  initial begin
+    $readmemh("dmem.hex", mem);
   end
 
 endmodule

@@ -39,10 +39,8 @@ module pc_mux (
   reg [XLEN-1:0] offset;
 
   always @(*) begin
-    if (branch) begin
-      base = pc_in;
-      offset = imm_b;
-    end
+    base = pc_in;
+    offset = `D_XLEN'h4;
 
     case (sel)
       PC_JAL: begin
@@ -54,11 +52,10 @@ module pc_mux (
         offset = imm_i & ~(`D_XLEN'b1);
       end
       PC_BRANCH: begin
-        // base and offset is already assigned
-      end
-      default: begin
-        base = pc_in;
-        offset = `D_XLEN'h4;
+        if (branch) begin
+          base = pc_in;
+          offset = imm_b;
+        end
       end
     endcase
   end

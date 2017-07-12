@@ -22,24 +22,22 @@
 
 // The instruction memory store instructions that the datapath will execute.
 module imem #(
-  SIZE = (1 << XLEN)
+  parameter NWORDS = (1 << XLEN) / (XLEN / 8)
 )(
-  input clk,
   input [XLEN-1:0] addr,
 
-  output reg [XLEN-1:0] rdata
+  output [XLEN-1:0] rdata
 );
 
   `include "constants.vh"
 
-  reg [XLEN-1:0] mem [SIZE-1:0];
+  reg [XLEN-1:0] mem [NWORDS-1:0];
+  wire [XLEN-1:0] mem_idx = addr >> 2;
+
+  assign rdata = mem[mem_idx];
 
   initial begin
-    $readmemh("imem.dat", mem);
-  end
-
-  always @(posedge clk) begin
-    rdata <= mem[addr];
+    $readmemh("imem.hex", mem);
   end
 
 endmodule

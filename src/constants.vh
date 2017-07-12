@@ -26,8 +26,12 @@
 `define D_SRCB_SEL_LEN 3
 `define D_PC_SEL_LEN 3
 `define D_REG_ADDR_LEN 5
-`define D_WB_SEL_LEN 1
+`define D_WB_SEL_LEN 2
 `define D_MEM_TYPE_LEN 3
+`define D_CSR_COUNTER_LEN 64
+`define D_CSR_SEL_LEN 1
+`define D_CSR_ADDR_LEN 12
+`define D_CSR_CMD_LEN 2
 
 localparam XLEN = `D_XLEN;
 localparam REG_ADDR_LEN = `D_REG_ADDR_LEN;
@@ -73,12 +77,33 @@ localparam MEM_TYPE_LEN = `D_MEM_TYPE_LEN,
            MEM_H        = `D_MEM_TYPE_LEN'b001,
            MEM_W        = `D_MEM_TYPE_LEN'b010,
            MEM_D        = `D_MEM_TYPE_LEN'b011,
-           MEM_BU       = `D_MEM_TYPE_LEN'd100,
-           MEM_HU       = `D_MEM_TYPE_LEN'd101,
-           MEM_WU       = `D_MEM_TYPE_LEN'd110;
+           MEM_BU       = `D_MEM_TYPE_LEN'b100,
+           MEM_HU       = `D_MEM_TYPE_LEN'b101,
+           MEM_WU       = `D_MEM_TYPE_LEN'b110;
 
 localparam WB_SEL_LEN = `D_WB_SEL_LEN,
            WB_ALU     = `D_WB_SEL_LEN'd0,
-           WB_MEM     = `D_WB_SEL_LEN'd1;
+           WB_MEM     = `D_WB_SEL_LEN'd1,
+           WB_CSR     = `D_WB_SEL_LEN'd2;
 
-localparam RV_NOP = `D_XLEN'b0010011;
+localparam RV_NOP     = `D_XLEN'b0010011,
+           RV_INVALID = `D_XLEN'b0;
+
+localparam CSR_SEL_LEN     = `D_CSR_SEL_LEN,
+           CSR_SEL_RS1     = `D_CSR_SEL_LEN'd0,
+           CSR_SEL_IMM     = `D_CSR_SEL_LEN'd1;
+
+localparam CSR_COUNTER_LEN   = `D_CSR_COUNTER_LEN,
+           CSR_ADDR_LEN      = `D_CSR_ADDR_LEN,
+           CSR_ADDR_CYCLE    = `D_CSR_ADDR_LEN'hC00,
+           CSR_ADDR_TIME     = `D_CSR_ADDR_LEN'hC01,
+           CSR_ADDR_INSTRET  = `D_CSR_ADDR_LEN'hC02,
+           CSR_ADDR_CYCLEH   = `D_CSR_ADDR_LEN'hC80,
+           CSR_ADDR_TIMEH    = `D_CSR_ADDR_LEN'hC81,
+           CSR_ADDR_INSTRETH = `D_CSR_ADDR_LEN'hC82;
+
+localparam CSR_CMD_LEN = `D_CSR_CMD_LEN,
+           CSR_READ    = `D_CSR_CMD_LEN'd0,
+           CSR_WRITE   = `D_CSR_CMD_LEN'd1,
+           CSR_SET     = `D_CSR_CMD_LEN'd2,
+           CSR_CLEAR   = `D_CSR_CMD_LEN'd3;
