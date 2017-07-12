@@ -1,0 +1,13 @@
+#!/bin/bash
+
+make "$1" \
+  | sort -k1n -k2 \
+  | awk '{
+      if (NR > 1 && $1 != prev) {
+        printf "\n";
+      }
+      prev=$1;
+      print $0;
+    }' \
+  | sed 's/^[[:space:]]*//' \
+  | sed '/./,$!d'
