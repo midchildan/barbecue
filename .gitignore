@@ -1,3 +1,4 @@
 build
 bbq.vcd
-imem.dat
+dmem.hex
+imem.hex

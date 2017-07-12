@@ -58,4 +58,4 @@ build/tests/isa/%.o: tests/isa/%.S tests/isa/riscv_test.h tests/isa/test_macros.
 		-DTEST_FUNC_TXT='"$(notdir $(basename $<))"' -DTEST_FUNC_RET=$(notdir $(basename $<))_ret $<
 
 clean:
-	rm -rf build
+	rm -rf build bbq.vcd imem.hex dmem.hex
