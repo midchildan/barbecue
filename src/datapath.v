@@ -47,7 +47,7 @@ module datapath #(
   wire [XLEN-1:0] imm_i = {{21{inst[31]}}, inst[30:20]};
   wire [XLEN-1:0] imm_s = {{21{inst[31]}}, inst[30:25], inst[11:7]};
   wire [XLEN-1:0] imm_b = {{20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 1'b0};
-  wire [XLEN-1:0] imm_u = {inst[31], inst[30:12], 12'b0};
+  wire [XLEN-1:0] imm_u = {inst[31:12], 12'b0};
   wire [XLEN-1:0] imm_j = {{12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0};
 
   wire [XLEN-1:0] rs1_data;
