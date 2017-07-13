@@ -19,7 +19,6 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
 // This file implements a solver for the sliding puzzle
 
 #include "puzzle.h"
@@ -128,34 +127,6 @@ static int search_moves(const board_t* board, move_t move, int max_cost,
   }
 
   return 0;
-}
-
-// Stack
-
-inline bool stack_empty(const mstack_t* stack) { return stack->len == 0; }
-
-inline move_t stack_peek(const mstack_t* stack) {
-  return stack->moves[stack->len - 1];
-}
-
-inline move_t stack_pop(mstack_t* stack) {
-  move_t move = stack_peek(stack);
-  if (stack_empty(stack)) {
-    return MOVE_INVALID;
-  }
-  stack->len -= 1;
-  return move;
-}
-
-inline bool stack_push(mstack_t* stack, move_t move) {
-  size_t len = stack->len + 1;
-  if (len > MAX_DEPTH) {
-    return false;
-  }
-
-  stack->moves[len - 1] = move;
-  stack->len = len;
-  return true;
 }
 
 // Search

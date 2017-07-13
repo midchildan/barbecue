@@ -19,13 +19,12 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+// This file implements the main routine for solving the sliding puzzle.
 
-// This file implements the main routine for solving the sliding puzzle on the
-// host.
-
-#include <stdio.h>
 #include <stdlib.h>
 
+#include "board.h"
+#include "print.h"
 #include "puzzle.h"
 
 void print_moves(mstack_t* moves) {
@@ -50,25 +49,20 @@ void print_moves(mstack_t* moves) {
         direction = '?';
     }
 
-    putchar(direction);
+    print_char(direction);
   }
-  putchar('\n');
+  print_char('\n');
 }
 
 int main(void) {
-  board_t board;
-  for (int i = 0; i < SIZE; i++) {
-    for (int j = 0; j < SIZE; j++) {
-      scanf("%d", &board.board[i][j]);
-    }
-  }
+  load_board(&board);
   init_board(&board);
 
   if (board.is_goal) {
     return EXIT_SUCCESS;
   }
 
-  mstack_t answer = {.moves = {0}, .len = 0};
+  mstack_t answer = {.moves = {MOVE_INVALID}, .len = 0};
   int max_cost = heuristic(&board);
   while (max_cost < MAX_DEPTH) {
     int min_cost = solve(&board, max_cost, &answer);

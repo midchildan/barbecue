@@ -1,6 +1,6 @@
-CFLAGS = '-g'
+CFLAGS = --std=c99 -g
 
-.PHONY: all
+.PHONY: all clean
 
 all: puzzle
 
@@ -8,7 +8,7 @@ puzzle: main.o puzzle.o
 
 puzzle.o: puzzle.c puzzle.h
 
-main.o: main.c puzzle.h
+main.o: main.c board.h print.h puzzle.h
 
 clean:
 	$(RM) puzzle main.o puzzle.o

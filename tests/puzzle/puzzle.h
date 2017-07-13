@@ -19,7 +19,6 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
 // This file defines functions for solving the sliding puzzle
 
 #pragma once
@@ -55,11 +54,39 @@ typedef struct {
   size_t len;
 } mstack_t;
 
-bool stack_empty(const mstack_t* stack);
-move_t stack_peek(const mstack_t* stack);
-move_t stack_pop(mstack_t* stack);
-bool stack_push(mstack_t* stack, move_t move);
+
+// Puzzle
 
 void init_board(board_t* board);
 int heuristic(const board_t* board);
 int solve(const board_t* board, int max_cost, mstack_t* solution);
+
+// Stack manipulation
+
+static inline bool stack_empty(const mstack_t* stack) {
+  return stack->len == 0;
+}
+
+static inline move_t stack_peek(const mstack_t* stack) {
+  return stack->moves[stack->len - 1];
+}
+
+static inline move_t stack_pop(mstack_t* stack) {
+  move_t move = stack_peek(stack);
+  if (stack_empty(stack)) {
+    return MOVE_INVALID;
+  }
+  stack->len -= 1;
+  return move;
+}
+
+static inline bool stack_push(mstack_t* stack, move_t move) {
+  size_t len = stack->len + 1;
+  if (len > MAX_DEPTH) {
+    return false;
+  }
+
+  stack->moves[len - 1] = move;
+  stack->len = len;
+  return true;
+}
