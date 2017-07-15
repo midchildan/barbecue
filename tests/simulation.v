@@ -39,6 +39,8 @@ module simulation #(
   reg enable_logger = 1'b0;
 
   bbq #(
+    .PC_START(PC_START),
+    .STACK_ADDR(STACK_ADDR),
     .IMEM_NWORDS(1 << 14),
     .DMEM_NWORDS(1 << 14)
   ) bbq (
