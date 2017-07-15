@@ -21,7 +21,11 @@
 
 #pragma once
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-prototypes"
+
 #include "puzzle.h"
+
 
 #ifdef BBQ_SIMULATION
 
@@ -33,7 +37,9 @@ static inline void load_board() {}
 
 #include <stdio.h>
 
-board_t board;
+board_t g_board;
+
+void load_board(board_t* board);
 
 void load_board(board_t* board) {
   for (int i = 0; i < SIZE; i++) {
@@ -44,3 +50,5 @@ void load_board(board_t* board) {
 }
 
 #endif  // BBQ_SIMULATION
+
+#pragma GCC diagnostic pop

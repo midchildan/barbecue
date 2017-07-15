@@ -19,61 +19,30 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-// This file implements the main routine for solving the sliding puzzle.
 
-#include <stdlib.h>
+`timescale 1ns / 1ps
 
-#include "board.h"
-#include "print.h"
-#include "puzzle.h"
+module testbench ();
 
-void print_moves(mstack_t* moves);
+  `include "constants.vh"
 
-int main(void) {
-  load_board(&g_board);
-  init_board(&g_board);
+  reg clk = 1'b0;
+  reg reset = 1'b1;
 
-  if (g_board.is_goal) {
-    return EXIT_SUCCESS;
-  }
+  always #5 clk = ~clk;
 
-  mstack_t answer = {.moves = {MOVE_INVALID}, .len = 0};
-  int max_cost = heuristic(&g_board);
-  while (max_cost < MAX_DEPTH) {
-    int min_cost = solve(&g_board, max_cost, &answer);
-    if (min_cost == 0) {
-      print_moves(&answer);
-      return EXIT_SUCCESS;
-    }
-    max_cost = min_cost;
-  }
+  initial begin
+    reset <= 1'b1;
+    repeat (3) @(posedge clk);
+    reset <= 1'b0;
+  end
 
-  return EXIT_FAILURE;
-}
+  simulation #(
+    .PC_START(`D_XLEN'h0),
+    .STACK_ADDR(~(`D_XLEN'h0))
+  ) simulation (
+    .clk(clk),
+    .reset(reset)
+  );
 
-void print_moves(mstack_t* moves) {
-  while (!stack_empty(moves)) {
-    move_t m = stack_pop(moves);
-
-    char direction;
-    switch (m) {
-      case MOVE_UP:
-        direction = 'U';
-        break;
-      case MOVE_DOWN:
-        direction = 'D';
-        break;
-      case MOVE_RIGHT:
-        direction = 'R';
-        break;
-      case MOVE_LEFT:
-        direction = 'L';
-        break;
-      default:
-        direction = '?';
-    }
-
-    print_char(direction);
-  }
-  print_char('\n');
-}
+endmodule

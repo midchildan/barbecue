@@ -37,7 +37,7 @@ module dmem #(
 
   localparam SHAMT_WIDTH = 5;
 
-  reg [XLEN-1:0] mem [NWORDS-1:0];
+  reg [XLEN-1:0] mem [0:NWORDS-1];
 
   wire [XLEN-1:0] mem_idx = addr >> 2;
   wire [SHAMT_WIDTH-1:0] shamt = {addr[1:0], 3'b0};

@@ -22,7 +22,9 @@
 
 // The datapath is where data flows through and is processed.
 module datapath #(
-  parameter ENABLE_COUNTERS = 1
+  parameter ENABLE_COUNTERS = 1,
+  parameter PC_START        = `D_XLEN'h0,
+  parameter STACK_ADDR      = ~(`D_XLEN'h0)
 )(
   input clk,
   input reset,
@@ -113,7 +115,7 @@ module datapath #(
   end
 
   always @(posedge clk) begin
-    if (reset) pc <= `D_XLEN'h0;
+    if (reset) pc <= PC_START;
     else if (~error) pc <= pc_next;
   end
 
@@ -124,9 +126,12 @@ module datapath #(
   wire [REG_ADDR_LEN-1:0] rs2_addr = inst[24:20];
   wire [REG_ADDR_LEN-1:0] rd_addr = inst[11:7];
 
-  regfile regfile (
+  regfile #(
+    .STACK_ADDR(STACK_ADDR)
+  ) regfile (
     // input
     .clk(clk),
+    .reset(reset),
     .ra1(rs1_addr),
     .ra2(rs2_addr),
     .wa(rd_addr),

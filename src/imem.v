@@ -31,7 +31,7 @@ module imem #(
 
   `include "constants.vh"
 
-  reg [XLEN-1:0] mem [NWORDS-1:0];
+  reg [XLEN-1:0] mem [0:NWORDS-1];
   wire [XLEN-1:0] mem_idx = addr >> 2;
 
   assign rdata = mem[mem_idx];

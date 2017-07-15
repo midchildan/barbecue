@@ -21,6 +21,8 @@
 
 
 module bbq #(
+  parameter PC_START    = `D_XLEN'h0,
+  parameter STACK_ADDR  = ~(`D_XLEN'h0),
   parameter IMEM_NWORDS = (1 << XLEN) / XLEN,
   parameter DMEM_NWORDS = (1 << XLEN) / XLEN
 )(
@@ -48,7 +50,10 @@ module bbq #(
   reg [XLEN-1:0] dmem_wdata;
   reg dmem_we;
 
-  datapath datapath (
+  datapath #(
+    .PC_START(PC_START),
+    .STACK_ADDR(STACK_ADDR)
+  ) datapath (
     // input
     .clk(clk),
     .reset(reset),

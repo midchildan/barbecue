@@ -30,7 +30,7 @@ from sys import argv, stderr
 class Board:
     HEADER_TEMPLATE = ''' #pragma once
 
-board_t board = {{
+board_t g_board = {{
   .board = {}
 }}; '''
 
