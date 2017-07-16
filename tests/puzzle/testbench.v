@@ -38,8 +38,8 @@ module testbench ();
   end
 
   simulation #(
-    .PC_START(`D_XLEN'h400),
-    .STACK_ADDR(`D_XLEN'h400)
+    .PC_START(`D_XLEN'h1000),
+    .STACK_ADDR(`D_XLEN'h1000)
   ) simulation (
     .clk(clk),
     .reset(reset)
