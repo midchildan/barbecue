@@ -6,9 +6,10 @@ BBQ_SRC = $(wildcard src/*.v)
 TEST_OBJS = $(addprefix build/,$(addsuffix .o,$(basename $(wildcard tests/isa/*.S))))
 FIRMWARE_OBJS = build/tests/firmware/start.o
 FIRMWARE_OBJS += $(addprefix build/,$(addsuffix .o,$(basename $(wildcard tests/firmware/*.c))))
-PUZZLE_OBJS = build/tests/firmware/stats.o build/tests/firmware/print.o
+PUZZLE_OBJS = build/tests/firmware/stats.o build/tests/firmware/print.o build/tests/syscalls.o
 PUZZLE_OBJS += build/tests/puzzle/main.o build/tests/puzzle/puzzle.o
-RISCV_CFLAGS = -march=rv32i -Os --std=c99 -MMD -MF build/deps/$(patsubst %.o,%.d,$(notdir $@))
+RISCV_CFLAGS = -march=rv32i -Os --std=gnu99 -MMD -MF build/deps/$(patsubst %.o,%.d,$(notdir $@))
+RISCV_CFLAGS += -DENABLE_DEBUG
 GCC_WARNS  = -Werror -Wall -Wextra -Wshadow -Wundef -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings
 GCC_WARNS += -Wredundant-decls -Wstrict-prototypes -Wmissing-prototypes -pedantic
 TOOLCHAIN_PREFIX = $(RISCV_GNU_TOOLCHAIN_INSTALL_PREFIX)/bin/riscv32-unknown-elf-
@@ -26,6 +27,10 @@ build-dir:
 build/bbq.vvp: tests/testbench.v tests/simulation.v $(BBQ_SRC)
 	iverilog -Isrc -o $@ $^
 	chmod -x $@
+
+build/tests/%.o: tests/%.c
+	$(TOOLCHAIN_PREFIX)gcc -c $(RISCV_CFLAGS) -DBBQ_SIMULATION \
+    $(GCC_WARNS) -o $@ $<
 
 clean:
 	rm -rf build bbq.vcd imem.hex dmem.hex
@@ -103,14 +108,14 @@ build/tests/puzzle/puzzle.bytes: build/tests/puzzle/puzzle.elf
 build/tests/puzzle/puzzle.elf: $(PUZZLE_OBJS) tests/firmware/riscv.ld
 	$(TOOLCHAIN_PREFIX)gcc -Os -o $@ \
     -Wl,-Bstatic,-T,tests/firmware/riscv.ld,-Map,build/tests/puzzle/puzzle.map,--strip-debug \
-		$(PUZZLE_OBJS)  -lgcc -lc
+		$(PUZZLE_OBJS)  -lgcc -lc -lnosys
 	chmod -x $@
 
-build/tests/puzzle/main.o: tests/puzzle/main.c
+build/tests/puzzle/main.o: tests/puzzle/main.c tests/puzzle/problem.h
 	$(TOOLCHAIN_PREFIX)gcc -c $(RISCV_CFLAGS) -DBBQ_SIMULATION \
     $(GCC_WARNS) -o $@ $<
 
-build/tests/puzzle/puzzle.o: tests/puzzle/puzzle.c
+build/tests/puzzle/%.o: tests/puzzle/%.c
 	$(TOOLCHAIN_PREFIX)gcc -c $(RISCV_CFLAGS) -DBBQ_SIMULATION \
     $(GCC_WARNS) -o $@ $<
 

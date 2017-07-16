@@ -21,20 +21,14 @@
 
 #pragma once
 
-#ifdef BBQ_SIMULATION
-
-#include <stdint.h>
-
-#define CONSOLE_ADDR 0x10000000
-
-static inline void print_char(char c) {
-  *((volatile uint32_t*)CONSOLE_ADDR) = c;
-}
-
-#else  // BBQ_SIMULATION
-
 #include <stdio.h>
 
-static inline void print_char(char c) { putchar(c); }
-
-#endif  // BBQ_SIMULATION
+#ifdef ENABLE_DEBUG
+#define DEBUG(fmt, ...)                                             \
+  do {                                                              \
+    fprintf(stderr, "%s:%d:%s: " fmt, __FILE__, __LINE__, __func__, \
+            __VA_ARGS__);                                           \
+  } while (0)
+#else
+#define DEBUG(fmt, ...)
+#endif

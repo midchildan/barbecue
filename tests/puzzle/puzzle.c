@@ -28,6 +28,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "utils.h"
+
 #define INF (INT_MAX / 2)
 
 // Private Functions

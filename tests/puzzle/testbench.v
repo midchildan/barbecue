@@ -39,7 +39,9 @@ module testbench ();
 
   simulation #(
     .PC_START(`D_XLEN'h1000),
-    .STACK_ADDR(`D_XLEN'h1000)
+    .STACK_ADDR(`D_XLEN'h1000),
+    .IMEM_NWORDS(1 << 16),
+    .DMEM_NWORDS(1 << 16)
   ) simulation (
     .clk(clk),
     .reset(reset)

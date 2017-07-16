@@ -19,63 +19,30 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-// This file implements the main routine for solving the sliding puzzle.
+#include <errno.h>
+#include <unistd.h>
 
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
+#define __BBQ_CONSOLE_ADDR 0x10000000
+#define __BBQ_EXIT_STATUS_ADDR 0x20000000
 
-#include "board.h"
-#include "puzzle.h"
-#include "utils.h"
-
-void print_moves(mstack_t* moves);
-
-int main(void) {
-  load_board(&g_board);
-  init_board(&g_board);
-
-  if (g_board.is_goal) {
-    return EXIT_SUCCESS;
+ssize_t write(int fd, const void* buf, size_t len) {
+  if (fd != STDOUT_FILENO && fd != STDERR_FILENO) {
+    errno = EBADF;
+    return -1;
   }
 
-  mstack_t answer = {.moves = {MOVE_INVALID}, .len = 0};
-  int max_cost = heuristic(&g_board);
-  while (max_cost < MAX_DEPTH) {
-    int min_cost = solve(&g_board, max_cost, &answer);
-    if (min_cost == 0) {
-      print_moves(&answer);
-      return EXIT_SUCCESS;
-    }
-    max_cost = min_cost;
+  for (const char* p = buf; p < (const char*)buf + len; p++) {
+    *(volatile int*)__BBQ_CONSOLE_ADDR = *p;
   }
 
-  return EXIT_FAILURE;
+  return len;
 }
 
-void print_moves(mstack_t* moves) {
-  while (!stack_empty(moves)) {
-    move_t m = stack_pop(moves);
-
-    char direction;
-    switch (m) {
-      case MOVE_UP:
-        direction = 'U';
-        break;
-      case MOVE_DOWN:
-        direction = 'D';
-        break;
-      case MOVE_RIGHT:
-        direction = 'R';
-        break;
-      case MOVE_LEFT:
-        direction = 'L';
-        break;
-      default:
-        direction = '?';
-    }
-
-    putchar(direction);
+void _exit(int status) {
+  if (status == 0) {
+    *(volatile int*)__BBQ_EXIT_STATUS_ADDR = 123456789;
   }
-  putchar('\n');
+
+  asm volatile("ebreak");
+  __builtin_unreachable();
 }

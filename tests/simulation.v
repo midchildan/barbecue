@@ -23,8 +23,10 @@
 `timescale 1ns / 1ps
 
 module simulation #(
-  parameter PC_START   = `D_XLEN'h0,
-  parameter STACK_ADDR = ~(`D_XLEN'h0)
+  parameter PC_START    = `D_XLEN'h0,
+  parameter STACK_ADDR  = ~(`D_XLEN'h0),
+  parameter IMEM_NWORDS = (1 << 14),
+  parameter DMEM_NWORDS = (1 << 14)
 )(
   input clk,
   input reset
@@ -41,8 +43,8 @@ module simulation #(
   bbq #(
     .PC_START(PC_START),
     .STACK_ADDR(STACK_ADDR),
-    .IMEM_NWORDS(1 << 14),
-    .DMEM_NWORDS(1 << 14)
+    .IMEM_NWORDS(IMEM_NWORDS),
+    .DMEM_NWORDS(DMEM_NWORDS)
   ) bbq (
     // input
     .clk(clk),
