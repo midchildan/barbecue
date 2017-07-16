@@ -20,24 +20,31 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-// The instruction memory store instructions that the datapath will execute.
-module imem #(
-  parameter NWORDS = (1 << XLEN) / (XLEN / 8)
-)(
-  input [XLEN-1:0] addr,
+`timescale 1ns / 1ps
 
-  output [XLEN-1:0] rdata
-);
+module testbench ();
 
   `include "constants.vh"
 
-  reg [XLEN-1:0] mem [0:NWORDS-1];
-  wire [XLEN-1:0] mem_idx = addr >> 2;
+  reg clk = 1'b0;
+  reg reset = 1'b1;
 
-  assign rdata = mem[mem_idx];
+  always #5 clk = ~clk;
 
   initial begin
-    $readmemh("imem.hex", mem);
+    reset <= 1'b1;
+    repeat (3) @(posedge clk);
+    reset <= 1'b0;
   end
+
+  simulation #(
+    .PC_START(`D_XLEN'h1000),
+    .STACK_ADDR(`D_XLEN'h1000),
+    .IMEM_NWORDS(1 << 16),
+    .DMEM_NWORDS(1 << 16)
+  ) simulation (
+    .clk(clk),
+    .reset(reset)
+  );
 
 endmodule

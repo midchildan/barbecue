@@ -22,8 +22,11 @@
 
 // The register file is a collection of registers used to stage data between
 // memory and the rest of the datapath.
-module regfile (
+module regfile #(
+  parameter STACK_ADDR = ~(`D_XLEN'h0)
+)(
   input clk,
+  input reset,
   input[REG_ADDR_LEN-1:0] ra1, ra2, wa,
   input we,
   input [XLEN-1:0] wdata,
@@ -34,13 +37,17 @@ module regfile (
 
   `include "constants.vh"
 
+  localparam REG_RA = 2;
+
   reg [XLEN-1:0] regs[XLEN-1:0];
 
   assign rd1 = (ra1 != 0) ? regs[ra1] : 0;
   assign rd2 = (ra2 != 0) ? regs[ra2] : 0;
 
   always @(posedge clk) begin
-    if (we && wa != 0) begin
+    if (reset) begin
+      regs[REG_RA] <= STACK_ADDR;
+    end else if (we && wa != 0) begin
       regs[wa] <= wdata;
     end
   end

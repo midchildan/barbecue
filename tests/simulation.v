@@ -22,30 +22,29 @@
 
 `timescale 1ns / 1ps
 
-module simulation ();
+module simulation #(
+  parameter PC_START    = `D_XLEN'h0,
+  parameter STACK_ADDR  = ~(`D_XLEN'h0),
+  parameter IMEM_NWORDS = (1 << 14),
+  parameter DMEM_NWORDS = (1 << 14)
+)(
+  input clk,
+  input reset
+);
 
   `include "constants.vh"
 
   // barbecue
 
-  reg clk = 1'b0;
-  reg reset = 1'b1;
   wire console_we;
   wire [XLEN-1:0] console_wdata;
   reg enable_logger = 1'b0;
 
-
-  always #5 clk = ~clk;
-
-  initial begin
-    reset <= 1'b1;
-    repeat (3) @(posedge clk);
-    reset <= 1'b0;
-  end
-
   bbq #(
-    .IMEM_NWORDS(1 << 14),
-    .DMEM_NWORDS(1 << 14)
+    .PC_START(PC_START),
+    .STACK_ADDR(STACK_ADDR),
+    .IMEM_NWORDS(IMEM_NWORDS),
+    .DMEM_NWORDS(DMEM_NWORDS)
   ) bbq (
     // input
     .clk(clk),

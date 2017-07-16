@@ -19,25 +19,30 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#include <errno.h>
+#include <unistd.h>
 
-// The instruction memory store instructions that the datapath will execute.
-module imem #(
-  parameter NWORDS = (1 << XLEN) / (XLEN / 8)
-)(
-  input [XLEN-1:0] addr,
+#define __BBQ_CONSOLE_ADDR 0x10000000
+#define __BBQ_EXIT_STATUS_ADDR 0x20000000
 
-  output [XLEN-1:0] rdata
-);
+ssize_t write(int fd, const void* buf, size_t len) {
+  if (fd != STDOUT_FILENO && fd != STDERR_FILENO) {
+    errno = EBADF;
+    return -1;
+  }
 
-  `include "constants.vh"
+  for (const char* p = buf; p < (const char*)buf + len; p++) {
+    *(volatile int*)__BBQ_CONSOLE_ADDR = *p;
+  }
 
-  reg [XLEN-1:0] mem [0:NWORDS-1];
-  wire [XLEN-1:0] mem_idx = addr >> 2;
+  return len;
+}
 
-  assign rdata = mem[mem_idx];
+void _exit(int status) {
+  if (status == 0) {
+    *(volatile int*)__BBQ_EXIT_STATUS_ADDR = 123456789;
+  }
 
-  initial begin
-    $readmemh("imem.hex", mem);
-  end
-
-endmodule
+  asm volatile("ebreak");
+  __builtin_unreachable();
+}

@@ -19,25 +19,36 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#pragma once
 
-// The instruction memory store instructions that the datapath will execute.
-module imem #(
-  parameter NWORDS = (1 << XLEN) / (XLEN / 8)
-)(
-  input [XLEN-1:0] addr,
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-prototypes"
 
-  output [XLEN-1:0] rdata
-);
+#include "puzzle.h"
 
-  `include "constants.vh"
 
-  reg [XLEN-1:0] mem [0:NWORDS-1];
-  wire [XLEN-1:0] mem_idx = addr >> 2;
+#ifdef BBQ_SIMULATION
 
-  assign rdata = mem[mem_idx];
+#include "problem.h"
 
-  initial begin
-    $readmemh("imem.hex", mem);
-  end
+static inline void load_board() {}
 
-endmodule
+#else  // BBQ_SIMULATION
+
+#include <stdio.h>
+
+board_t g_board;
+
+void load_board(board_t* board);
+
+void load_board(board_t* board) {
+  for (int i = 0; i < SIZE; i++) {
+    for (int j = 0; j < SIZE; j++) {
+      scanf("%d", &board->board[i][j]);
+    }
+  }
+}
+
+#endif  // BBQ_SIMULATION
+
+#pragma GCC diagnostic pop

@@ -19,25 +19,16 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#pragma once
 
-// The instruction memory store instructions that the datapath will execute.
-module imem #(
-  parameter NWORDS = (1 << XLEN) / (XLEN / 8)
-)(
-  input [XLEN-1:0] addr,
+#include <stdio.h>
 
-  output [XLEN-1:0] rdata
-);
-
-  `include "constants.vh"
-
-  reg [XLEN-1:0] mem [0:NWORDS-1];
-  wire [XLEN-1:0] mem_idx = addr >> 2;
-
-  assign rdata = mem[mem_idx];
-
-  initial begin
-    $readmemh("imem.hex", mem);
-  end
-
-endmodule
+#ifdef ENABLE_DEBUG
+#define DEBUG(fmt, ...)                                             \
+  do {                                                              \
+    fprintf(stderr, "%s:%d:%s: " fmt, __FILE__, __LINE__, __func__, \
+            __VA_ARGS__);                                           \
+  } while (0)
+#else
+#define DEBUG(fmt, ...)
+#endif

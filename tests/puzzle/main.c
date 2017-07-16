@@ -19,25 +19,63 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+// This file implements the main routine for solving the sliding puzzle.
 
-// The instruction memory store instructions that the datapath will execute.
-module imem #(
-  parameter NWORDS = (1 << XLEN) / (XLEN / 8)
-)(
-  input [XLEN-1:0] addr,
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-  output [XLEN-1:0] rdata
-);
+#include "board.h"
+#include "puzzle.h"
+#include "utils.h"
 
-  `include "constants.vh"
+void print_moves(mstack_t* moves);
 
-  reg [XLEN-1:0] mem [0:NWORDS-1];
-  wire [XLEN-1:0] mem_idx = addr >> 2;
+int main(void) {
+  load_board(&g_board);
+  init_board(&g_board);
 
-  assign rdata = mem[mem_idx];
+  if (g_board.is_goal) {
+    return EXIT_SUCCESS;
+  }
 
-  initial begin
-    $readmemh("imem.hex", mem);
-  end
+  mstack_t answer = {.moves = {MOVE_INVALID}, .len = 0};
+  int max_cost = heuristic(&g_board);
+  while (max_cost < MAX_DEPTH) {
+    int min_cost = solve(&g_board, max_cost, &answer);
+    if (min_cost == 0) {
+      print_moves(&answer);
+      return EXIT_SUCCESS;
+    }
+    max_cost = min_cost;
+  }
 
-endmodule
+  return EXIT_FAILURE;
+}
+
+void print_moves(mstack_t* moves) {
+  while (!stack_empty(moves)) {
+    move_t m = stack_pop(moves);
+
+    char direction;
+    switch (m) {
+      case MOVE_UP:
+        direction = 'U';
+        break;
+      case MOVE_DOWN:
+        direction = 'D';
+        break;
+      case MOVE_RIGHT:
+        direction = 'R';
+        break;
+      case MOVE_LEFT:
+        direction = 'L';
+        break;
+      default:
+        direction = '?';
+    }
+
+    putchar(direction);
+  }
+  putchar('\n');
+}
