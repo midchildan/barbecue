@@ -8,6 +8,7 @@ FIRMWARE_OBJS = build/tests/firmware/start.o
 FIRMWARE_OBJS += $(addprefix build/,$(addsuffix .o,$(basename $(wildcard tests/firmware/*.c))))
 PUZZLE_OBJS = build/tests/firmware/stats.o build/tests/firmware/print.o
 PUZZLE_OBJS += build/tests/puzzle/main.o build/tests/puzzle/puzzle.o
+RISCV_CFLAGS = -march=rv32i -Os --std=c99 -MMD -MF build/deps/$(patsubst %.o,%.d,$(notdir $@))
 GCC_WARNS  = -Werror -Wall -Wextra -Wshadow -Wundef -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings
 GCC_WARNS += -Wredundant-decls -Wstrict-prototypes -Wmissing-prototypes -pedantic
 TOOLCHAIN_PREFIX = $(RISCV_GNU_TOOLCHAIN_INSTALL_PREFIX)/bin/riscv32-unknown-elf-
@@ -17,6 +18,7 @@ TOOLCHAIN_PREFIX = $(RISCV_GNU_TOOLCHAIN_INSTALL_PREFIX)/bin/riscv32-unknown-elf
 all: build-dir build/bbq.vvp build/tests/firmware.hex
 
 build-dir:
+	mkdir -p build/deps
 	mkdir -p build/tests/isa
 	mkdir -p build/tests/firmware
 	mkdir -p build/tests/puzzle
@@ -63,7 +65,7 @@ build/tests/firmware/start.o: tests/firmware/start.S
 	$(TOOLCHAIN_PREFIX)gcc -c -march=rv32i -o $@ $<
 
 build/tests/firmware/%.o: tests/firmware/%.c
-	$(TOOLCHAIN_PREFIX)gcc -c -march=rv32i -Os --std=c99 $(GCC_WARNS) -ffreestanding -nostdlib -o $@ $<
+	$(TOOLCHAIN_PREFIX)gcc -c $(RISCV_CFLAGS) $(GCC_WARNS) -ffreestanding -nostdlib -o $@ $<
 
 build/tests/isa/%.o: tests/isa/%.S tests/isa/riscv_test.h tests/isa/test_macros.h
 	$(TOOLCHAIN_PREFIX)gcc -c -march=rv32im -o $@ -DTEST_FUNC_NAME=$(notdir $(basename $<)) \
@@ -104,16 +106,15 @@ build/tests/puzzle/puzzle.elf: $(PUZZLE_OBJS) tests/firmware/riscv.ld
 		$(PUZZLE_OBJS)  -lgcc -lc
 	chmod -x $@
 
-build/tests/puzzle/main.o: tests/puzzle/main.c tests/puzzle/board.h tests/puzzle/print.h tests/puzzle/puzzle.h
-	$(TOOLCHAIN_PREFIX)gcc -c -march=rv32i -Os --std=c99 -DBBQ_SIMULATION \
+build/tests/puzzle/main.o: tests/puzzle/main.c
+	$(TOOLCHAIN_PREFIX)gcc -c $(RISCV_CFLAGS) -DBBQ_SIMULATION \
     $(GCC_WARNS) -o $@ $<
 
-build/tests/puzzle/puzzle.o: tests/puzzle/puzzle.c tests/puzzle/puzzle.h tests/puzzle/problem.h
-	$(TOOLCHAIN_PREFIX)gcc -c -march=rv32i -Os --std=c99 -DBBQ_SIMULATION \
+build/tests/puzzle/puzzle.o: tests/puzzle/puzzle.c
+	$(TOOLCHAIN_PREFIX)gcc -c $(RISCV_CFLAGS) -DBBQ_SIMULATION \
     $(GCC_WARNS) -o $@ $<
 
 tests/puzzle/problem.h:
 	python3 tests/puzzle/generate-board.py --header $(PUZZLE_WIDTH) > $@
 
-build/tests/puzzle/start.o: tests/puzzle/start.S
-	$(TOOLCHAIN_PREFIX)gcc -c -march=rv32i -o $@ $<
+-include build/deps/*.d
