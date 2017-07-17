@@ -36,6 +36,10 @@ module simulation #(
 
   // barbecue
 
+  /* verilator  lint_off UNOPTFLAT */
+  wire error;
+  /* verilator  lint_on UNOPTFLAT */
+  wire test_passed;
   wire console_we;
   wire [XLEN-1:0] console_wdata;
   reg enable_logger = 1'b0;
@@ -79,12 +83,14 @@ module simulation #(
 
   // debug
 
+`ifndef VERILATOR
   initial begin
     if ($test$plusargs("vcd")) begin
       $dumpfile("bbq.vcd");
       $dumpvars(0, bbq);
     end
   end
+`endif
 
   initial begin
     if ($test$plusargs("verbose")) begin
@@ -97,7 +103,7 @@ module simulation #(
     .clk(clk),
     .en(enable_logger),
     .reset(reset),
-    .error(bbq.datapath.error)
+    .error(error)
   );
 
   pc_logger pc_logger (

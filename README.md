@@ -12,6 +12,7 @@ A simple processor based on RISC-V
 ## Requirements
 
 - icarus verilog
+- verilator (optional)
 - RISC-V GNU Compiler Toolchain
 - Python 3
 
@@ -60,6 +61,9 @@ $ make puzzle
 
 # Get a detailed log and vcd output for the puzzle
 $ make puzzle_vcd
+
+# Run puzzle with verilator
+$ make vpuzzle
 ```
 
 ## Authors

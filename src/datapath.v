@@ -180,7 +180,6 @@ module datapath #(
   // Memory
 
   wire [XLEN-1:0] load_data;
-  wire [XLEN-1:0] store_mask;
 
   mem_load mem_load (
     // input
