@@ -1,4 +1,5 @@
 build
+build-vpuzzle
 bbq.vcd
 dmem.hex
 imem.hex
