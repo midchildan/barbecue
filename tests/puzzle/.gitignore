@@ -1,1 +1,4 @@
 problem.h
+puzzle
+*.o
+*.d

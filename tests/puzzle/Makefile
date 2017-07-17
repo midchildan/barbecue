@@ -1,14 +1,17 @@
-CFLAGS = --std=c99 -g
+CFLAGS = --std=gnu99 -MMD -g
+OBJS = main.o puzzle.o
 
 .PHONY: all clean
 
 all: puzzle
 
-puzzle: main.o puzzle.o
+puzzle: $(OBJS)
 
-puzzle.o: puzzle.c puzzle.h
+puzzle.o: puzzle.c
 
-main.o: main.c board.h print.h puzzle.h
+main.o: main.c
 
 clean:
-	$(RM) puzzle main.o puzzle.o
+	$(RM) puzzle $(OBJS) *.d
+
+-include *.d
