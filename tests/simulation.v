@@ -58,6 +58,9 @@ module simulation #(
     .console_we(console_we),
     .console_wdata(console_wdata),
     .test_passed(test_passed),
+    .seven_seg_we(),
+    .seven_seg_addr(),
+    .seven_seg_wdata(),
     .error(error)
   );
 

@@ -36,7 +36,7 @@ module control (
   output reg [CSR_CMD_LEN-1:0] csr_cmd,
   output reg [CSR_SEL_LEN-1:0] csr_sel,
   output reg [PC_SEL_LEN-1:0] pc_sel,
-  output reg error
+  output reg error = 1'b0
 );
 
   `include "constants.vh"

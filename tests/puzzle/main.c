@@ -53,6 +53,67 @@ int main(void) {
   return EXIT_FAILURE;
 }
 
+#ifdef BBQ_FPGA
+
+#define SEG_ADDR 0x30000000
+#define SEG_SLEEP_TIMES 100000
+
+#define SEG_U 0x3e
+#define SEG_P 0x67
+#define SEG_D 0x3d
+#define SEG_O 0x1d
+#define SEG_R 0x77
+#define SEG_I 0x30
+#define SEG_L 0x0e
+#define SEG_E 0x4f
+
+static inline void write_7seg(int digit, uint32_t ctrl) {
+  *((volatile uint32_t*)(SEG_ADDR + digit)) = ctrl;
+}
+
+static inline void sleep(int times) {
+  for (int i = 0; i < times; i++) {
+    asm volatile ("nop");
+  }
+}
+
+void print_moves(mstack_t* moves) {
+  while (!stack_empty(moves)) {
+    move_t m = stack_pop(moves);
+
+    switch(m) {
+      case MOVE_UP:
+        write_7seg(1, SEG_U);
+        write_7seg(0, SEG_P);
+        sleep(SEG_SLEEP_TIMES);
+        break;
+      case MOVE_DOWN:
+        write_7seg(1, SEG_D);
+        write_7seg(0, SEG_O);
+        sleep(SEG_SLEEP_TIMES);
+        break;
+      case MOVE_RIGHT:
+        write_7seg(1, SEG_R);
+        write_7seg(0, SEG_I);
+        sleep(SEG_SLEEP_TIMES);
+        break;
+      case MOVE_LEFT:
+        write_7seg(1, SEG_L);
+        write_7seg(0, SEG_E);
+        sleep(SEG_SLEEP_TIMES);
+        break;
+      default:
+        break;
+    }
+
+    write_7seg(1, 0);
+    write_7seg(0, 0);
+    sleep(SEG_SLEEP_TIMES);
+  }
+}
+
+#else
+
 void print_moves(mstack_t* moves) {
   while (!stack_empty(moves)) {
     move_t m = stack_pop(moves);
@@ -79,3 +140,5 @@ void print_moves(mstack_t* moves) {
   }
   putchar('\n');
 }
+
+#endif

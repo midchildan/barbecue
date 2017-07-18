@@ -32,6 +32,9 @@ module bbq #(
   output reg [XLEN-1:0] console_wdata,
   output reg console_we,
   output reg test_passed = 1'b0,
+  output reg seven_seg_we,
+  output reg [XLEN-1:0] seven_seg_addr,
+  output reg [XLEN-1:0] seven_seg_wdata,
   output error
 );
 
@@ -39,6 +42,7 @@ module bbq #(
 
   localparam CONSOLE_ADDR   = `D_XLEN'h1000_0000;
   localparam TEST_STAT_ADDR = `D_XLEN'h2000_0000;
+  localparam SEVEN_SEG_ADDR = `D_XLEN'h3000_0000;
 
   wire [XLEN-1:0] imem_addr;
   wire [XLEN-1:0] imem_rdata;
@@ -71,18 +75,26 @@ module bbq #(
 
   wire is_console = dmem_io_we && (dmem_addr == CONSOLE_ADDR);
   wire is_test_res = dmem_io_we && (dmem_addr == TEST_STAT_ADDR) && (dmem_io_wdata == 123456789);
+  wire is_seven_seg = dmem_io_we && (dmem_addr[XLEN-1:2] == SEVEN_SEG_ADDR[XLEN-1:2]);
 
   always @(*) begin
     dmem_we = 1'b0;
-    dmem_wdata = `D_XLEN'b0;
+    dmem_wdata = `D_XLEN'h0;
     console_we = 1'b0;
-    console_wdata = `D_XLEN'b0;
+    console_wdata = `D_XLEN'h0;
+    seven_seg_we = 1'b0;
+    seven_seg_addr = `D_XLEN'h0;
+    seven_seg_wdata = `D_XLEN'h0;
 
     if (is_console) begin
       console_we = 1'b1;
       console_wdata = dmem_io_wdata;
     end else if (is_test_res) begin
       test_passed = 1'b1;
+    end else if (is_seven_seg) begin
+      seven_seg_we = 1'b1;
+      seven_seg_addr = dmem_addr;
+      seven_seg_wdata = dmem_io_wdata;
     end else begin
       dmem_we = dmem_io_we;
       dmem_wdata = dmem_io_wdata;
